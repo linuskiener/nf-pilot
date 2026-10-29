@@ -20,7 +20,14 @@ Pilot for (issue-specific) news frame and epistemic frame detection in transcrip
 
 ## Setup
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # add your API keys, never commit .env
 ```
+
+## Preparing a corpus
+Put the scraper export (e.g. `niusde_2025_H1_DATA.csv`) in `data/raw/`, then:
+```bash
+python -m src.nf_pilot.prepare_corpus data/raw/niusde_2025_H1_DATA.csv
+```
+This writes a cleaned per-video table (`*_TRANS_trans.csv`) and a per-segment table (`*_SEG.csv`) to `data/processed/`. Segments are about 200 words, end at sentence boundaries where the captions have punctuation, and carry a YouTube link to the exact start time.
