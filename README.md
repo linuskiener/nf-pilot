@@ -22,7 +22,7 @@ Pilot for (issue-specific) news frame and epistemic frame detection in transcrip
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # add your API keys, never commit .env
+cp .env.example .env   # add your API keys (TYPESAFE_API_KEY for Jev), never commit .env
 ```
 
 ## Preparing a corpus

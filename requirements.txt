@@ -1,4 +1,6 @@
 pandas
+openpyxl
+typesafe-sdk
 python-dotenv
 scikit-learn
 krippendorff
