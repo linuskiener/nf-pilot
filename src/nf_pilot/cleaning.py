@@ -9,6 +9,8 @@ import re
 
 import pandas as pd
 
+from .segmentation import is_punctuated
+
 # Flattened subtitle-text columns, e.g. "subtitles/0/srt", "subtitles/1/srt".
 SRT_COLUMN_PATTERN = re.compile(r"^subtitles/(\d+)/srt$")
 
@@ -88,12 +90,8 @@ def load_dataframe(path):
         df["cues"] = [[] for _ in range(len(df))]
     df["transcript"] = df["cues"].map(lambda cues: " ".join(t for _, t in cues))
     # About half of the auto-generated captions come without any sentence
-    # punctuation; those can only be segmented by length until punctuation
-    # is restored.
-    words = df["transcript"].str.split().str.len()
-    df["punctuated"] = (words > 0) & (
-        df["transcript"].str.count(r"[.!?]") >= 0.01 * words
-    )
+    # punctuation; segmentation cuts those at pauses instead of sentences.
+    df["punctuated"] = df["transcript"].map(is_punctuated)
 
     if "type" not in df.columns:
         df["type"] = pd.Series(pd.NA, index=df.index, dtype="string")
