@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data: raw transcripts and processed corpus stay local
+data/raw/*
+data/processed/*
+!data/**/.gitkeep
+*.key
+.DS_Store
