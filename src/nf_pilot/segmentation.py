@@ -18,6 +18,9 @@ SENTENCE_END = re.compile(
     r"(?:(?<=[.!?])|(?<=[.!?][\"“”»]))\s+(?=[\"„“«A-ZÄÖÜ0-9])"
 )
 
+# Caption markers for music, applause and laughter.
+MARKER = re.compile(r"\[(musik|applaus|gelächter)\]", re.IGNORECASE)
+
 
 def split_sentences(text):
     """Split text into ``(char_offset, sentence)`` pairs."""
@@ -67,10 +70,70 @@ def pack_sentences(sentences, target_words=200, max_words=300):
     return segments
 
 
+def _break_score(cues, i):
+    """How likely a segment boundary is after cue ``i``.
+
+    Auto-captions overlap, so cue end times carry no pause information. The
+    time until the next cue starts, per word of cue ``i``, does: on the
+    punctuated captions, the slowest 10% of cues end a sentence about three
+    times as often as the average cue. Music, applause or laughter markers
+    are treated as certain breaks.
+    """
+    start, text = cues[i]
+    if i + 1 >= len(cues):
+        return float("inf")
+    next_start, next_text = cues[i + 1]
+    if MARKER.search(text) or MARKER.search(next_text):
+        return float("inf")
+    return (next_start - start) / max(len(text.split()), 1)
+
+
+def pack_cues(cues, target_words=200, max_words=300):
+    """Group unpunctuated cues into segments, cutting at the likeliest pause.
+
+    Each segment ends at the cue with the highest break score among those
+    that keep it between ``0.75 * target_words`` and ``max_words`` words.
+    """
+    min_words = int(0.75 * target_words)
+    counts = [len(text.split()) for _, text in cues]
+    segments = []
+    a = 0
+    while a < len(cues):
+        best, best_score, words = None, -1.0, 0
+        for j in range(a, len(cues)):
+            words += counts[j]
+            if words > max_words and best is not None:
+                break
+            if words >= min_words or j == len(cues) - 1:
+                score = _break_score(cues, j)
+                if score > best_score:
+                    best, best_score = j, score
+            if words > max_words:
+                break
+        if best is None:
+            best = j
+        text = " ".join(t for _, t in cues[a:best + 1])
+        segments.append((cues[a][0], text))
+        a = best + 1
+    return segments
+
+
+def is_punctuated(text):
+    """At least one sentence-final . ! ? per 100 words."""
+    words = len(text.split())
+    return words > 0 and len(re.findall(r"[.!?]", text)) >= 0.01 * words
+
+
 def segment_video(cues, target_words=200, max_words=300):
-    """Segment one video's cues into ``(start_seconds, text)`` pairs."""
+    """Segment one video's cues into ``(start_seconds, text)`` pairs.
+
+    Punctuated captions are cut at sentence boundaries, unpunctuated ones at
+    the likeliest pauses between cues.
+    """
     if not cues:
         return []
+    if not is_punctuated(" ".join(text for _, text in cues)):
+        return pack_cues(cues, target_words, max_words)
     # Rebuild the transcript exactly as cleaning.load_dataframe does and
     # remember where each cue starts, to map segments back to video time.
     offsets, starts, pos = [], [], 0
