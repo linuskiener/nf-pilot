@@ -9,6 +9,12 @@ from pathlib import Path
 
 CODEBOOK_DIR = Path(__file__).resolve().parents[2] / "codebook"
 
+# Asked before all other items; if the answer is no, they are not coded.
+RELEVANCE_QUESTION = (
+    "Is the segment about news, politics or society "
+    "(not ads, greetings, merchandise or small talk)?"
+)
+
 # A table row whose first cell is an item id such as "RESP1" or "HUM4".
 ITEM_ROW = re.compile(r"^\|\s*([A-Z]+\d+[a-z]?)\s*\|\s*(.+?)\s*\|\s*$")
 
