@@ -37,3 +37,10 @@ This writes a cleaned per-video table (`*_TRANS_trans.csv`) and a per-segment ta
 python -m src.nf_pilot.sample data/processed/niusde_2025_H1_SEG.csv --n 60
 ```
 Draws 60 segments (at least 80 words, at most one per video), balanced over video/stream/shorts and punctuated/unpunctuated captions, and writes `data/annotations/niusde_2025_H1_pilot_60.xlsx`. Items come from the tables in `codebook/generic_frames.md`; fill each with 1 or 0. The same seed always gives the same sample.
+
+## Jev pre-test
+With `TYPESAFE_API_KEY` in `.env` and some rows of the pilot sheet coded:
+```bash
+python -m src.nf_pilot.jev_pilot data/annotations/niusde_2025_H1_pilot_60.xlsx
+```
+Scores every row that has a value in `relevant` with one Jev Noul per item and writes `eval/*_jev.csv` and `eval/*_jev_report.md` (agreement per item, and every disagreement with your note).

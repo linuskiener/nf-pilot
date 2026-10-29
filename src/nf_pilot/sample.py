@@ -16,7 +16,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from .codebook import load_items
+from .codebook import RELEVANCE_QUESTION, load_items
 
 CONTEXT_WORDS = 40
 
@@ -64,9 +64,8 @@ def write_sheet(sample, items, path):
     sheet["notes"] = ""
     codebook = pd.DataFrame(
         {"item": ["relevant", *items],
-         "question": ["Is the segment about news, politics or society "
-                      "(not ads, greetings, merchandise or small talk)? "
-                      "If 0, leave the other items empty.", *items.values()]}
+         "question": [RELEVANCE_QUESTION
+                      + " If 0, leave the other items empty.", *items.values()]}
     )
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
         sheet.to_excel(writer, index=False, sheet_name="coding")
