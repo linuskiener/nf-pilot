@@ -205,7 +205,7 @@ tabs.forEach(([t]) => $(t).addEventListener('click', () => show(t)));
 
 // ---------- word map ----------
 const wLayers = [['regions', 'Plain grid'], ['umatrix', 'U-matrix (borders between word fields)'], ['hits', 'Hit map (words per square)']];
-Object.keys(W.faces).forEach(k => { const [col, val] = k.split(':'); wLayers.push([k, `Face: ${col === 'month' ? 'month ' : 'format '}${val}`]); });
+Object.keys(W.faces).forEach(k => { const [col, val] = k.split(':'); wLayers.push([k, `Face: ${col === 'type' ? 'format ' : ''}${val}`]); });
 $('wlayer').innerHTML = wLayers.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
 const wcells = [];
 function buildWord() {
@@ -256,7 +256,7 @@ function selectWord(r, c) {
   $('wpanel').innerHTML = `<h3>Square n${r * W.cols + c + 1} · row ${r + 1}, column ${c + 1}</h3>
     <h2>${words.slice(0, 3).join(', ') || 'Empty square'}</h2>
     <div><h3>All ${words.length} words, most frequent first</h3><div class="chips">${words.map(w => `<span class="chip">${w}</span>`).join('') || '<span class="empty">No word landed here; it lies between its neighbours.</span>'}</div></div>
-    <dl class="kv"><dt>U-matrix</dt><dd>${W.umatrix[r][c].toFixed(3)}</dd>${top.map(([k, v]) => `<dt>${k.replace(':', ' ')}</dt><dd>+${v.toFixed(2)} log2</dd>`).join('')}</dl>
+    <dl class="kv"><dt>U-matrix</dt><dd>${W.umatrix[r][c].toFixed(3)}</dd>${top.map(([k, v]) => `<dt>${k.split(':')[1]}</dt><dd>+${v.toFixed(2)} log2</dd>`).join('')}</dl>
     ${rt ? `<div><h3>Region ${reg} · ${rt.words} words</h3><p style="margin:0;color:var(--ink-2);font-size:12.5px">${rt.top_words}</p></div>` : ''}`;
   try { localStorage.setItem('som-wsel', `${r},${c}`); } catch (e) {}
 }
@@ -276,7 +276,7 @@ $('wsearch').addEventListener('input', () => {
 
 // ---------- segment map ----------
 const sLayers = [['umatrix', 'U-matrix (borders between topics)'], ['hits', 'Hit map (segments per square)']];
-Object.keys(S.months).forEach(m => sLayers.push([`month:${m}`, `Month ${m} vs. all months`]));
+Object.keys(S.months).forEach(m => sLayers.push([`month:${m}`, `${m} vs. the whole period`]));
 sLayers.push(['format', 'Format (majority shorts / stream / video)']);
 sLayers.push(['punctuated', 'Data check: share of punctuated captions']);
 sLayers.push(['concentration', 'Data check: share from one single video']);

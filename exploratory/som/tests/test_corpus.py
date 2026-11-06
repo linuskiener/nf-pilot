@@ -32,3 +32,14 @@ def test_term_matrix_and_ppmi():
 
 def test_umatrix_is_zero_for_identical_prototypes():
     assert np.allclose(umatrix(np.ones((3, 4, 2))), 0)
+
+
+def test_truncated_lemmas_are_repaired():
+    from collections import Counter
+
+    from exploratory.som.corpus import repair_map
+
+    surfaces = Counter({("Migrationswend", "Migrationswende"): 5,
+                        ("Wahl", "Wahlen"): 3})
+    assert repair_map(surfaces, seen={"Wahl", "Wahlen", "Migrationswende"}) == {
+        "Migrationswend": "Migrationswende"}

@@ -10,10 +10,9 @@ U-matrix of Bungum & Gambäck (2015), and the visualisations of `torchsom`
 
 ```bash
 pip install -r exploratory/som/requirements.txt        # once; torch can be the CPU build
-python -m src.nf_pilot.prepare_corpus data/raw/niusde_2025_H1_DATA.csv   # if the SEG file is missing
-python -m exploratory.som.run data/processed/niusde_2025_H1_SEG.csv \
-    --videos data/raw/niusde_2025_H1_DATA.csv --n-process 4
-python -m exploratory.som.explorer exploratory/som/output/niusde_2025_H1
+python -m src.nf_pilot.prepare_corpus data/raw/niusde_*_DATA.csv   # all half-years at once
+python -m exploratory.som.run data/processed/niusde_*_SEG.csv --videos data/raw/niusde_*_DATA.csv --name niusde_all --drop-duplicates --drop-roles outro weather --n-process 4
+python -m exploratory.som.explorer exploratory/som/output/niusde_all
 ```
 
 Several `*_SEG.csv` files can be given at once (e.g. two half-years, or two
@@ -22,7 +21,16 @@ On a laptop CPU the whole run takes a few minutes, most of it lemmatisation,
 which is cached in `output/<name>/lemmas.csv`. Useful options: `--words`
 (size of the word map vocabulary), `--word-rows/--word-cols`,
 `--seg-rows/--seg-cols`, `--word-regions/--seg-regions` (k-means regions),
-`--terms` (component planes to draw).
+`--terms` (component planes to draw), `--period month|halfyear` (time
+slices for the faces; default month up to 12 months, otherwise half-year),
+`--drop-duplicates` (leave out segments that `prepare_corpus` found re-used
+from a longer upload, so a stream and its Shorts are not counted twice) and
+`--drop-roles` (leave out show furniture, e.g. `outro weather`).
+
+`python -m exploratory.som.suggest_variants exploratory/som/output/<name>`
+lists spelling variants that the SOM vectors place in the same contexts as a
+more frequent word (`variant_suggestions.csv`), as input for the reviewed
+list in `src/nf_pilot/resources/name_variants.csv`.
 
 ## Design decisions
 
@@ -55,11 +63,10 @@ dropped. A term has to appear in at least 20 segments of at least 8 videos,
 so one stream's transcription errors cannot claim a square.
 
 **Punctuation does not matter here.** Both maps use bags of lemmas, so
-sentence boundaries are never used. What does matter is the quality of the
-automatic speech recognition: names come out as variants (Habbeck, Habck,
-Harbeck; "März" for Merz). The word map puts these variants right next to the
-correct spelling, but on the segment map they pull unpunctuated (auto-captioned)
-segments together; see "Reading the figures".
+sentence boundaries are never used. Name variants from speech recognition
+(Habbeck, "Friedrich März") are corrected upstream by
+`src/nf_pilot/normalize.py`; the small spaCy model's truncated lemmas
+("Migrationswend") are repaired in `corpus.repair_map`.
 
 **SOM settings.** `torchsom.SOM`, rectangular grid, PCA initialisation,
 Gaussian neighbourhood with sigma from a quarter of the longer side down to 1,
@@ -75,10 +82,10 @@ prototypes (`SOM.cluster`).
 | `02_word_umatrix.png` | distance of each square to its neighbours; dark ridges separate word fields |
 | `03_word_hits.png` | words per square |
 | `04_word_training.png`, `13_segment_training.png` | quantisation and topographic error per epoch |
-| `05_word_faces_month.png`, `05_word_faces_type.png` | the book's "spectral faces": how much more (red) or less (blue) a month or format uses each square's words than the whole corpus, log2, shrunk towards 0 where counts are small |
+| `05_word_faces_period.png`, `05_word_faces_type.png` | the book's "spectral faces": how much more (red) or less (blue) a month or format uses each square's words than the whole corpus, log2, shrunk towards 0 where counts are small |
 | `10_segment_map_regions.png` | segment map regions with their key terms |
 | `11_segment_umatrix.png`, `12_segment_hits.png` | U-matrix and hit map of the segment map |
-| `14_segment_months.png` | where each month talks more or less than usual |
+| `14_segment_periods.png` | where each month (or half-year) talks more or less than usual |
 | `15_segment_format.png` | majority format per square (shorts / stream / video), paler = mixed |
 | `16_segment_punctuation.png` | data check: share of punctuated captions per square |
 | `19_segment_video_concentration.png` | data check: share of a square's segments from its single largest video |
@@ -103,8 +110,9 @@ prototypes (`SOM.cluster`).
   and knife crime; June Israel/Iran.
 - The segment map is not driven by one stream per square (the concentration
   map stays low almost everywhere), so its regions are topics, not videos.
-- Punctuation is mixed in most regions, but the Habeck, Scholz and Bundestag
-  regions are 70-90 % unpunctuated auto-captions. Part of their separation
-  comes from ASR spellings of names that only auto-captions produce. A small
-  name-normalisation list (Habbeck/Habck -> Habeck, Friedrich März -> Merz)
-  would be the next cleaning step if these regions matter.
+- Punctuation is a proxy for time, not for quality: all captions in the
+  export are auto-generated, and YouTube's recogniser started punctuating in
+  March 2025 (0-5 % punctuated in Jan/Feb, 84-100 % from April). The Habeck
+  and Scholz regions are 80-90 % unpunctuated because 75-80 % of their
+  segments are from January and February. Restricting analyses to punctuated
+  transcripts would therefore cut out the election campaign.

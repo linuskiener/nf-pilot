@@ -173,4 +173,6 @@ def segment_dataframe(df, target_words=200, max_words=300):
                 "n_words": len(text.split()),
                 "text": text,
             })
+    if not rows:
+        return pd.DataFrame(columns=["segment_id", "video_id", "type", "text"])
     return pd.DataFrame(rows)

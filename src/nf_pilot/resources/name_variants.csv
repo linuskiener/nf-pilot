@@ -1,0 +1,26 @@
+pattern,replacement,kind,note
+(?i)\b(?:habbeck|habck|harbeck|habek)(s?)\b,Habeck\1,person,"Robert Habeck; ASR variants seen 2025 H1"
+(?i)\b(?:merärz|meärz|meerz|mertz)(s?)\b,Merz\1,person,"Friedrich Merz; 'März' is handled by context rules in normalize.py"
+(?i)\b(?:berbock|bärbock|berbuck|berbck|bererbock|berärbock|bergbock|berbok)(s?)\b,Baerbock\1,person,Annalena Baerbock
+(?i)\b(?:klingbal|klingball|klingbeall|klingenball|klingbil|klingbei)(s?)\b,Klingbeil\1,person,Lars Klingbeil
+(?i)\b(?:selenski|zelenski|selenskij)(s?)\b,Selenskyj\1,person,Wolodymyr Selenskyj (German press spelling)
+(?<!Till )\b(?:Lindemann|Linemann|linemann|Lindnemann|Linermann|Lindermann)(s?)\b,Linnemann\1,person,"Carsten Linnemann; not after 'Till' (Till Lindemann)"
+\b[Mm]ask(s?)\b,Musk\1,person,"Elon Musk; the German word is 'Maske'"
+(?i)\b(?:feser)(s?)\b,Faeser\1,person,Nancy Faeser
+\b[Ss]parn(s?)\b,Spahn\1,person,Jens Spahn
+\b(?:Dobrin|Dobrint|Dobrind|Doprint|dobrin|dobrint|doprint)(s?)\b,Dobrindt\1,person,Alexander Dobrindt
+\b(?:Kistler|kisler|Kisler|Kiesler)(s?)\b,Kissler\1,person,Alexander Kissler (NIUS)
+\b(?:Reicheld|reicheld)(s?)\b,Reichelt\1,person,Julian Reichelt (NIUS)
+\bJulian [Rr]eichel\b,Julian Reichelt,person,Julian Reichelt (NIUS)
+(?i)\b(?:sackerberg|zackerberg|zckerberg|zockerberg|sockerberg|sckerberg|zuackerberg|suckerberg)(s?)\b,Zuckerberg\1,person,Mark Zuckerberg
+\b(?:Eskin|eskin|esken)(s?)\b,Esken\1,person,Saskia Esken
+(?i)\b(?:netanyahu|netanahu|netaniau|netanjau|netanahua)(s?)\b,Netanjahu\1,person,Benjamin Netanjahu (German press spelling)
+\b(?:Rupala|Rupalla|Hupala|Hupalla|rupala|rupalla|hupala)(s?)\b,Chrupalla\1,person,Tino Chrupalla
+(?i)\bgelbhar\b,Gelbhaar,person,Stefan Gelbhaar
+(?i)\b(?:hateaid|hateid)\b,HateAid,organisation,HateAid
+\b(?:[Ee]rschaffenburg|[Ee]rchaffenburg|[Aa]rschaffenburg|[Aa]rchaffenburg|[Cc]haffenburg|[Ss]chaffenburg)(er?)?\b,Aschaffenburg\1,place,Aschaffenburg
+\bSoling\b,Solingen,place,Solingen (not a German word on its own)
+\b(?:News|news|Nius|nius)[ -]Live\b,NIUS Live,organisation,"Channel's show name, captions write 'News Live'"
+\b(?:news|News|nius)\.de\b,nius.de,organisation,Channel's website
+\b(beginnt mit )News\b,\1NIUS,organisation,"Show slogan 'Der Tag beginnt mit NIUS'"
+\bNews[ -](Chefredakteur|Politikchef|Chef|Reporter|Reporterin|Moderator|Moderatorin|Kolumnist)\b,NIUS-\1,organisation,"NIUS staff roles"
