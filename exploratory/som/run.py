@@ -120,7 +120,7 @@ def run_word_map(df, vocab, out, args):
 
     whole = node_totals(np.ones(len(df), bool))
     faces = {}
-    for column, min_size in (("month", 500), ("type", 0)):
+    for column, min_size in ((args.period, 500), ("type", 0)):
         maps, titles = [], []
         for value, group in df.groupby(column):
             if len(group) < min_size:
@@ -132,7 +132,8 @@ def run_word_map(df, vocab, out, args):
             titles.append(f"{value}  ({len(group)} segments)")
             faces[f"{column}:{value}"] = face
         plots.small_multiples(
-            out / f"05_word_faces_{column}.png", maps, titles,
+            out / f"05_word_faces_{'period' if column == args.period else column}.png",
+            maps, titles,
             f"Word map faces by {column}: red = this cell's words are used "
             "more than usual, blue = less", regions=regions,
             cbar_label="log2 share vs. whole corpus")
@@ -194,7 +195,7 @@ def run_segment_map(df, vocab, out, args, videos=None):
         })
         centre_labels.append((centres[int(k)], "\n".join(terms[:3])))
     pd.DataFrame(region_rows).to_csv(out / "segment_regions.csv", index=False)
-    seg_out = seg[["segment_id", "video_id", "type", "month", "title", "url"]].copy()
+    seg_out = seg[["segment_id", "video_id", "type", "month", "halfyear", "title", "url"]].copy()
     seg_out["row"], seg_out["col"] = m.bmu[:, 0], m.bmu[:, 1]
     seg_out["region"] = region_of_seg
     seg_out.to_csv(out / "segment_cells.csv", index=False)
@@ -224,20 +225,20 @@ def run_segment_map(df, vocab, out, args, videos=None):
     all_counts = per_node(np.ones(len(seg), bool))
     sparse_cell = all_counts < 3
 
-    # Months: where on the map each month talks more than usual.
+    # Periods: where on the map each month / half-year talks more than usual.
     month_maps, month_titles, month_export = [], [], {}
-    for month, group in seg.groupby("month"):
+    for month, group in seg.groupby(args.period):
         if len(group) < 500:
             continue
-        part = per_node(seg["month"].eq(month).to_numpy())
+        part = per_node(seg[args.period].eq(month).to_numpy())
         face = log_ratio(part, all_counts, part.sum(), all_counts.sum(), prior=3)
         face[sparse_cell] = np.nan
         month_maps.append(face.reshape(rows, cols))
         month_titles.append(f"{month}  ({len(group)} segments)")
         month_export[month] = face
-    plots.small_multiples(out / "14_segment_months.png", month_maps, month_titles,
-                          "Segment map by month: red = over-represented that month",
-                          regions=regions, cbar_label="log2 share vs. all months")
+    plots.small_multiples(out / "14_segment_periods.png", month_maps, month_titles,
+                          f"Segment map by {args.period}: red = over-represented",
+                          regions=regions, cbar_label="log2 share vs. whole period")
 
     # Format (shorts / video / stream): majority per cell, faded by purity.
     types = sorted(seg["type"].dropna().unique())
@@ -304,7 +305,7 @@ def run_segment_map(df, vocab, out, args, videos=None):
         if len(lst) < 3:
             lst.append({"title": str(seg.at[i, "title"])[:120],
                         "url": seg.at[i, "url"], "type": seg.at[i, "type"],
-                        "month": seg.at[i, "month"],
+                        "month": seg.at[i, args.period],
                         "text": str(seg.at[i, "clean"])[:280]})
 
     summary = {
@@ -357,13 +358,23 @@ def main():
     parser.add_argument("--terms", nargs="*", default=DEFAULT_TERMS,
                         help="lower-cased terms for the component planes")
     parser.add_argument("--n-process", type=int, default=1)
+    parser.add_argument("--period", choices=["month", "halfyear"], default=None,
+                        help="time slices for the faces (default: month for up "
+                             "to 12 months, else halfyear)")
+    parser.add_argument("--drop-duplicates", action="store_true",
+                        help="leave out segments re-used from another upload")
+    parser.add_argument("--drop-roles", nargs="*", default=[],
+                        help="segment roles to leave out, e.g. outro weather")
     args = parser.parse_args()
 
     args.name = args.name or args.segments[0].name.removesuffix("_SEG.csv")
     out = args.output_dir / args.name
     out.mkdir(parents=True, exist_ok=True)
 
-    df = load_segments(args.segments)
+    df = load_segments(args.segments, drop_duplicates=args.drop_duplicates,
+                       drop_roles=args.drop_roles)
+    if args.period is None:
+        args.period = "month" if df["month"].nunique() <= 12 else "halfyear"
     df = lemmatize_segments(df, cache=out / "lemmas.csv", n_process=args.n_process)
     vocab = vocabulary(df)
     videos = None
@@ -375,6 +386,8 @@ def main():
     seg_summary, seg_export = run_segment_map(df, vocab, out, args, videos)
 
     summary = {"name": args.name, "segments_in": len(df), "vocabulary": len(vocab),
+               "period": args.period, "drop_duplicates": args.drop_duplicates,
+               "drop_roles": args.drop_roles,
                "word_map": word_summary, "segment_map": seg_summary}
     (out / "summary.json").write_text(json.dumps(summary, indent=2))
     (out / "explorer_data.json").write_text(json.dumps(

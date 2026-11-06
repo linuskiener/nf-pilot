@@ -6,3 +6,5 @@ scikit-learn
 krippendorff
 jupyter
 pytest
+wordfreq
+tabulate
