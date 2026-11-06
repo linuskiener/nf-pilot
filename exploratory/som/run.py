@@ -381,6 +381,9 @@ def main():
     if args.videos:
         videos = pd.concat([pd.read_csv(p, usecols=["id", "viewCount"])
                             for p in args.videos], ignore_index=True)
+        # A video can appear in two half-year files (scraped twice); keep the
+        # row from the file listed last, which is the more recent view count.
+        videos = videos.drop_duplicates("id", keep="last")
 
     word_summary, word_export = run_word_map(df, vocab, out, args)
     seg_summary, seg_export = run_segment_map(df, vocab, out, args, videos)
