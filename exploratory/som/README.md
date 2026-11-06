@@ -15,6 +15,11 @@ python -m exploratory.som.run data/processed/niusde_*_SEG.csv --videos data/raw/
 python -m exploratory.som.explorer exploratory/som/output/niusde_all
 ```
 
+To update the public site (GitHub Pages, served from `docs/` on `main`),
+add `--site docs` to the explorer call and commit `docs/atlas/index.html`:
+`python -m exploratory.som.explorer exploratory/som/output/niusde_all --site docs`.
+It is then at https://linuskiener.github.io/nf-pilot/atlas/.
+
 Several `*_SEG.csv` files can be given at once (e.g. two half-years, or two
 channels); they are then placed on one shared map, and `--name` names the run.
 On a laptop CPU the whole run takes a few minutes, most of it lemmatisation,

@@ -16,6 +16,7 @@ Pilot for (issue-specific) news frame and epistemic frame detection in transcrip
 - `prompts/`: LLM prompt templates
 - `src/nf_pilot/`: segmentation, labelling and evaluation code
 - `notebooks/`: exploration
+- `docs/`: GitHub Pages site (the SOM atlas at https://linuskiener.github.io/nf-pilot/atlas/)
 - `eval/`: results and metrics
 
 ## Setup
