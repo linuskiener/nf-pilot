@@ -1,0 +1,365 @@
+<title>Transcript Concept Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an atlas — a short header, then one map plate at a time with its legend and a reading panel beside it. */
+:root {
+  --paper: #f6f6f3;
+  --plate: #fdfdfb;
+  --cell: #ffffff;
+  --ink: #15171a;
+  --ink-2: #4c5058;
+  --muted: #8b8f96;
+  --rule: #dfe0dc;
+  --border: #1e2228;
+  --accent: #2a5bd7;
+  --cold: #1c5cab;
+  --warm: #c23b3a;
+  --hit: #2a5bd7;
+  --cat-1: #2a78d6; --cat-2: #eb6834; --cat-3: #1baf7a;
+  --mark: #ffe58a;
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121417; --plate: #181b1f; --cell: #1f2328; --ink: #eceef0; --ink-2: #b4b9c0;
+    --muted: #7d838b; --rule: #2d3238; --border: #e6e8ea; --accent: #6f9cf0;
+    --cold: #4f8fe8; --warm: #e86a68; --hit: #6f9cf0;
+    --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; --mark: #7a6514;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121417; --plate: #181b1f; --cell: #1f2328; --ink: #eceef0; --ink-2: #b4b9c0;
+  --muted: #7d838b; --rule: #2d3238; --border: #e6e8ea; --accent: #6f9cf0;
+  --cold: #4f8fe8; --warm: #e86a68; --hit: #6f9cf0;
+  --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; --mark: #7a6514;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.5; }
+.wrap { max-width: 1480px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 22px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 650; font-size: clamp(28px, 4vw, 42px); line-height: 1.08; margin: 0; text-wrap: balance; }
+.lede { max-width: 72ch; color: var(--ink-2); margin: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 500; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+.tab { font: 500 14px var(--body); background: none; border: 0; padding: 10px 14px; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:focus-visible, select:focus-visible, input:focus-visible, .wcell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: end; }
+.control { display: grid; gap: 4px; }
+.control label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+select, input[type="search"] { font: 14px var(--body); color: var(--ink); background: var(--plate); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+input[type="search"] { width: min(260px, 70vw); }
+.hint { font-size: 12.5px; color: var(--muted); max-width: 70ch; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.plate { background: var(--plate); border: 1px solid var(--rule); border-radius: 8px; padding: 14px; min-width: 0; display: grid; gap: 10px; }
+.scroller { overflow: auto; max-height: 78vh; border-radius: 4px; }
+.legend { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ramp { width: 180px; height: 10px; border-radius: 2px; border: 1px solid var(--rule); }
+.swatch { display: inline-flex; align-items: center; gap: 6px; }
+.swatch i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+/* word grid */
+.wgrid { display: grid; position: relative; width: max-content; background: var(--rule); gap: 1px; border: 1px solid var(--rule); }
+.wcell { width: 96px; height: 86px; background: var(--cell); padding: 3px 4px 2px; position: relative; overflow: hidden; cursor: pointer; font-size: 10.5px; line-height: 1.18; color: var(--ink); }
+.wcell .tag { font-family: var(--mono); font-size: 8.5px; color: var(--muted); display: block; margin-bottom: 1px; }
+.wcell .w { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wcell .more { color: var(--muted); font-size: 9.5px; }
+.wcell.dark-bg { color: #ffffff; } .wcell.dark-bg .tag, .wcell.dark-bg .more { color: rgba(255,255,255,.75); }
+.wcell .w.hit { background: var(--mark); color: var(--ink); border-radius: 2px; }
+.wcell.sel { box-shadow: inset 0 0 0 2px var(--accent); }
+.bt { border-top: 2px solid var(--border) !important; } .bb { border-bottom: 2px solid var(--border) !important; }
+.bl { border-left: 2px solid var(--border) !important; } .br { border-right: 2px solid var(--border) !important; }
+/* segment grid */
+.sgrid-wrap { position: relative; width: max-content; }
+.sgrid { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.scell { width: 22px; height: 22px; background: var(--cell); cursor: pointer; position: relative; }
+.scell.sel { box-shadow: inset 0 0 0 2px var(--accent); }
+.scell.na { background-image: repeating-linear-gradient(45deg, transparent 0 3px, var(--rule) 3px 4px); }
+.rlabel { position: absolute; transform: translate(-50%, -50%); font-size: 10.5px; line-height: 1.15; text-align: center; background: color-mix(in srgb, var(--plate) 88%, transparent); color: var(--ink); padding: 2px 5px; border-radius: 4px; pointer-events: none; white-space: nowrap; font-weight: 500; }
+.rlabels[hidden] { display: none; }
+/* panel */
+aside.panel { background: var(--plate); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; display: grid; gap: 12px; min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+aside h2 { font-family: var(--display); font-weight: 500; font-size: 20px; margin: 0; line-height: 1.2; }
+aside h3 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.chip { font-size: 12.5px; padding: 1px 7px; border: 1px solid var(--rule); border-radius: 999px; background: var(--cell); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+.ex { display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid var(--rule); font-size: 12.5px; }
+.ex a { color: var(--accent); font-weight: 500; text-decoration: none; } .ex a:hover { text-decoration: underline; }
+.ex p { margin: 0; color: var(--ink-2); }
+.ex .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.empty { color: var(--muted); font-size: 13px; }
+section.method { display: grid; gap: 10px; max-width: 78ch; }
+section.method h2 { font-family: var(--display); font-weight: 500; font-size: 22px; margin: 0; }
+section.method p, section.method li { color: var(--ink-2); margin: 0; }
+section.method ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--paper); font-size: 12px; padding: 6px 8px; border-radius: 5px; max-width: 260px; line-height: 1.35; }
+@media (prefers-reduced-motion: no-preference) { .wcell, .scell { transition: background-color .15s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">Self-organizing maps · exploratory</div>
+    <h1>Transcript Concept Atlas</h1>
+    <p class="lede">Two self-organizing maps of the transcripts. On the <b>word map</b> every square holds lemmas that are used in the same stretches of talk, so neighbouring squares hold related concepts. On the <b>segment map</b> every square holds ~200-word transcript segments about the same thing, and the heatmap layers show when, where and in which format a topic is talked about.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-word" aria-selected="true" aria-controls="view-word">Word map</button>
+    <button class="tab" role="tab" id="tab-seg" aria-selected="false" aria-controls="view-seg">Segment map</button>
+    <button class="tab" role="tab" id="tab-method" aria-selected="false" aria-controls="view-method">How to read it</button>
+  </div>
+
+  <div id="view-word" role="tabpanel" aria-labelledby="tab-word" style="display:grid;gap:14px">
+    <div class="controls">
+      <div class="control"><label for="wlayer">Layer</label><select id="wlayer"></select></div>
+      <div class="control"><label for="wsearch">Find a word</label><input type="search" id="wsearch" placeholder="e.g. Migration, Musk, Rente" autocomplete="off"></div>
+      <div class="legend" id="wlegend"></div>
+    </div>
+    <div class="layout">
+      <div class="plate"><div class="scroller" id="wscroll"><div class="wgrid" id="wgrid"></div></div>
+        <div class="hint">Thick lines separate the k-means regions of the map. The grey tag <span style="font-family:var(--mono)">nXeY</span> means node X holding Y words, as in the book. Click a square to list all of its words.</div></div>
+      <aside class="panel" id="wpanel"></aside>
+    </div>
+  </div>
+
+  <div id="view-seg" role="tabpanel" aria-labelledby="tab-seg" hidden style="gap:14px">
+    <div class="controls">
+      <div class="control"><label for="slayer">Layer</label><select id="slayer"></select></div>
+      <div class="control"><label for="slabels">Region labels</label><select id="slabels"><option value="on">Show</option><option value="off">Hide</option></select></div>
+      <div class="legend" id="slegend"></div>
+    </div>
+    <div class="layout">
+      <div class="plate"><div class="scroller"><div class="sgrid-wrap"><div class="sgrid" id="sgrid"></div><div class="rlabels" id="rlabels"></div></div></div>
+        <div class="hint">Hover a square for its prototype's strongest terms, click it to read the three segments closest to it. Hatched squares hold fewer than three segments.</div></div>
+      <aside class="panel" id="spanel"></aside>
+    </div>
+  </div>
+
+  <section class="method" id="view-method" role="tabpanel" aria-labelledby="tab-method" hidden>
+    <h2>How the maps were made</h2>
+    <ul>
+      <li><b>Unit of observation.</b> The word map follows the book: a word is an observation and is described by its contexts. The contexts are the ~200-word segments from the existing segmentation step, so a long livestream counts as many contexts and a Short as one. The segment map treats each segment as an observation, as in the Reuters paper.</li>
+      <li><b>Cleaning.</b> Caption markers ([Musik], [Applaus], broken SRT time stamps) are removed. spaCy (de_core_news_sm) reduces every word to its lemma and keeps nouns, proper nouns, adjectives and verbs; stop words and spoken fillers are dropped. Punctuation is never used, so captions with and without punctuation are treated the same.</li>
+      <li><b>Vocabulary.</b> Lemmas found in at least 20 segments of at least 8 different videos. That keeps transcription errors of single streams off the map but keeps frequent mis-hearings such as "März" for Merz, which then sit right next to the correct spelling.</li>
+      <li><b>Vectors.</b> Word map: positive PMI of words sharing a segment, compressed to 200 dimensions with SVD. Segment map: TF-IDF of the segment, compressed the same way. Both are length-normalised, so distance on the map means cosine distance.</li>
+      <li><b>Training.</b> torchsom, rectangular grid, PCA initialisation, Gaussian neighbourhood shrinking from a quarter of the map to one cell. Regions are k-means clusters of the trained prototypes.</li>
+      <li><b>Heatmaps.</b> U-matrix (distance of a square to its neighbours: high = a border between topics), hit map (how many words or segments landed there), component planes (weight of one term in each prototype), and "faces": how much more or less a month or a format uses a square than the corpus as a whole, in log2 units, shrunk towards zero where there is little data.</li>
+    </ul>
+    <p>The maps are exploratory. Squares near the centre of the word map collect general verbs and adjectives that occur everywhere; the topical vocabulary sits towards the edges and corners.</p>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA = __DATA__;
+const $ = (id) => document.getElementById(id);
+const W = DATA.word, S = DATA.segment, SUM = DATA.summary;
+
+function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function hex2rgb(h) { h = h.replace('#',''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function rgb(c) { return `rgb(${c[0]},${c[1]},${c[2]})`; }
+function lum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255; }
+let PAL = {};
+function readPalette() {
+  PAL = { cell: hex2rgb(css('--cell')), cold: hex2rgb(css('--cold')), warm: hex2rgb(css('--warm')), hit: hex2rgb(css('--hit')), ink: hex2rgb(css('--ink')),
+          cats: [css('--cat-1'), css('--cat-2'), css('--cat-3')], dark: lum(hex2rgb(css('--cell'))) < 0.4 };
+}
+function seq(t) { t = Math.max(0, Math.min(1, t)); return mix(PAL.cell, PAL.hit, t * 0.92); }
+function grey(t) { t = Math.max(0, Math.min(1, t)); return mix(PAL.cell, PAL.ink, t * 0.55); }
+function div(v, lim) { const t = Math.max(-1, Math.min(1, v / lim)); return t < 0 ? mix(PAL.cell, PAL.cold, -t * 0.95) : mix(PAL.cell, PAL.warm, t * 0.95); }
+function flat(g) { return g.flat(); }
+function pct(arr, p) { const a = arr.filter(Number.isFinite).sort((x, y) => x - y); return a.length ? a[Math.min(a.length - 1, Math.floor(p * (a.length - 1)))] : 1; }
+
+// ---------- header ----------
+$('eyebrow').textContent = `Self-organizing maps · ${SUM.name} · exploratory`;
+$('stats').innerHTML = [
+  ['segments', SUM.segments_in.toLocaleString('en')], ['vocabulary', SUM.vocabulary.toLocaleString('en') + ' lemmas'],
+  ['word map', `${SUM.word_map.words.toLocaleString('en')} words · ${SUM.word_map.rows}×${SUM.word_map.cols}`],
+  ['segment map', `${SUM.segment_map.segments.toLocaleString('en')} segments · ${SUM.segment_map.rows}×${SUM.segment_map.cols}`],
+  ['topographic error', `${SUM.word_map.topographic_error_pct}% / ${SUM.segment_map.topographic_error_pct}%`]
+].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+
+// ---------- tabs ----------
+const tabs = [['tab-word', 'view-word'], ['tab-seg', 'view-seg'], ['tab-method', 'view-method']];
+function show(id) {
+  tabs.forEach(([t, v]) => { const on = t === id; $(t).setAttribute('aria-selected', on); $(v).hidden = !on; if (on && v !== 'view-method') $(v).style.display = 'grid'; });
+  try { localStorage.setItem('som-tab', id); } catch (e) {}
+}
+tabs.forEach(([t]) => $(t).addEventListener('click', () => show(t)));
+
+// ---------- word map ----------
+const wLayers = [['regions', 'Plain grid'], ['umatrix', 'U-matrix (borders between word fields)'], ['hits', 'Hit map (words per square)']];
+Object.keys(W.faces).forEach(k => { const [col, val] = k.split(':'); wLayers.push([k, `Face: ${col === 'month' ? 'month ' : 'format '}${val}`]); });
+$('wlayer').innerHTML = wLayers.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+const wcells = [];
+function buildWord() {
+  const g = $('wgrid'); g.style.gridTemplateColumns = `repeat(${W.cols}, 96px)`;
+  const R = W.regions;
+  for (let r = 0; r < W.rows; r++) for (let c = 0; c < W.cols; c++) {
+    const words = W.cells[r][c], el = document.createElement('div');
+    el.className = 'wcell'; el.tabIndex = 0; el.dataset.r = r; el.dataset.c = c;
+    if (r > 0 && R[r-1][c] !== R[r][c]) el.classList.add('bt');
+    if (r < W.rows - 1 && R[r+1][c] !== R[r][c]) el.classList.add('bb');
+    if (c > 0 && R[r][c-1] !== R[r][c]) el.classList.add('bl');
+    if (c < W.cols - 1 && R[r][c+1] !== R[r][c]) el.classList.add('br');
+    const shown = words.slice(0, 5), more = words.length - shown.length;
+    el.innerHTML = `<span class="tag">n${r * W.cols + c + 1}e${words.length}</span>` + shown.map(w => `<span class="w">${w}</span>`).join('') + (more > 0 ? `<span class="more">+${more} more</span>` : '');
+    el.addEventListener('click', () => selectWord(r, c));
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectWord(r, c); } });
+    g.appendChild(el); wcells.push(el);
+  }
+}
+function paintWord() {
+  const layer = $('wlayer').value; let vals, color, legend = '';
+  if (layer === 'umatrix') {
+    vals = flat(W.umatrix); const lo = Math.min(...vals), hi = Math.max(...vals);
+    color = v => grey((v - lo) / (hi - lo || 1));
+    legend = rampLegend(grey, 'close to neighbours', 'border zone');
+  } else if (layer === 'hits') {
+    vals = flat(W.cells).map(w => w.length); const hi = pct(vals, 0.98);
+    color = v => v === 0 ? PAL.cell : seq(v / hi);
+    legend = rampLegend(seq, '0 words', `${hi}+ words`);
+  } else if (layer.includes(':')) {
+    vals = flat(W.faces[layer]); const lim = Math.max(0.3, pct(vals.map(Math.abs), 0.98));
+    color = v => div(v, lim);
+    legend = divLegend(`used less (−${lim.toFixed(1)} log2)`, `used more (+${lim.toFixed(1)} log2)`);
+  } else { vals = null; }
+  wcells.forEach((el, i) => {
+    const c = vals ? color(vals[i]) : PAL.cell; el.style.backgroundColor = rgb(c);
+    el.classList.toggle('dark-bg', !PAL.dark && lum(c) < 0.45);
+  });
+  $('wlegend').innerHTML = legend;
+}
+function selectWord(r, c) {
+  wcells.forEach(e => e.classList.remove('sel'));
+  wcells[r * W.cols + c].classList.add('sel');
+  const words = W.cells[r][c], reg = W.regions[r][c];
+  const rt = W.region_table.find(x => x.region === reg);
+  const faces = Object.entries(W.faces).map(([k, g]) => [k, g[r][c]]);
+  const top = faces.slice().sort((a, b) => b[1] - a[1]).slice(0, 2).filter(f => f[1] > 0.15);
+  $('wpanel').innerHTML = `<h3>Square n${r * W.cols + c + 1} · row ${r + 1}, column ${c + 1}</h3>
+    <h2>${words.slice(0, 3).join(', ') || 'Empty square'}</h2>
+    <div><h3>All ${words.length} words, most frequent first</h3><div class="chips">${words.map(w => `<span class="chip">${w}</span>`).join('') || '<span class="empty">No word landed here; it lies between its neighbours.</span>'}</div></div>
+    <dl class="kv"><dt>U-matrix</dt><dd>${W.umatrix[r][c].toFixed(3)}</dd>${top.map(([k, v]) => `<dt>${k.replace(':', ' ')}</dt><dd>+${v.toFixed(2)} log2</dd>`).join('')}</dl>
+    ${rt ? `<div><h3>Region ${reg} · ${rt.words} words</h3><p style="margin:0;color:var(--ink-2);font-size:12.5px">${rt.top_words}</p></div>` : ''}`;
+  try { localStorage.setItem('som-wsel', `${r},${c}`); } catch (e) {}
+}
+$('wlayer').addEventListener('change', paintWord);
+$('wsearch').addEventListener('input', () => {
+  const q = $('wsearch').value.trim().toLowerCase(); let first = null;
+  wcells.forEach((el, i) => {
+    const r = Math.floor(i / W.cols), c = i % W.cols, words = W.cells[r][c];
+    const spans = el.querySelectorAll('.w'); let any = false;
+    spans.forEach(s => { const m = q.length > 1 && s.textContent.toLowerCase().includes(q); s.classList.toggle('hit', m); any = any || m; });
+    if (!any && q.length > 1 && words.slice(5).some(w => w.toLowerCase().includes(q))) any = true;
+    el.style.outline = any ? '2px solid var(--accent)' : ''; el.style.outlineOffset = any ? '-2px' : '';
+    if (any && first === null) first = [r, c, el];
+  });
+  if (first) { first[2].scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' }); selectWord(first[0], first[1]); }
+});
+
+// ---------- segment map ----------
+const sLayers = [['umatrix', 'U-matrix (borders between topics)'], ['hits', 'Hit map (segments per square)']];
+Object.keys(S.months).forEach(m => sLayers.push([`month:${m}`, `Month ${m} vs. all months`]));
+sLayers.push(['format', 'Format (majority shorts / stream / video)']);
+sLayers.push(['punctuated', 'Data check: share of punctuated captions']);
+sLayers.push(['concentration', 'Data check: share from one single video']);
+if (S.views) sLayers.push(['views', 'Mean log10 views of the source videos']);
+Object.keys(S.planes).forEach(t => sLayers.push([`plane:${t}`, `Component plane: ${t}`]));
+$('slayer').innerHTML = sLayers.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+const scells = [];
+function buildSeg() {
+  const g = $('sgrid'); g.style.gridTemplateColumns = `repeat(${S.cols}, 22px)`;
+  for (let r = 0; r < S.rows; r++) for (let c = 0; c < S.cols; c++) {
+    const el = document.createElement('div'); el.className = 'scell'; el.tabIndex = 0;
+    el.addEventListener('click', () => selectSeg(r, c));
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter') selectSeg(r, c); });
+    el.addEventListener('mousemove', (e) => tip(e, `<b>${S.top_terms[r][c].slice(0, 5).join(', ')}</b><br>${S.hits[r][c]} segments · region ${S.regions[r][c]}`));
+    el.addEventListener('mouseleave', () => $('tip').hidden = true);
+    g.appendChild(el); scells.push(el);
+  }
+  // region labels at the member cell nearest each region's centroid
+  const L = $('rlabels'), step = 23;
+  S.region_table.forEach(rt => {
+    const pts = []; S.regions.forEach((row, r) => row.forEach((k, c) => { if (k === rt.region) pts.push([r, c]); }));
+    const mr = pts.reduce((s, p) => s + p[0], 0) / pts.length, mc = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    const best = pts.reduce((b, p) => ((p[0]-mr)**2 + (p[1]-mc)**2) < ((b[0]-mr)**2 + (b[1]-mc)**2) ? p : b);
+    const d = document.createElement('div'); d.className = 'rlabel';
+    d.style.left = `${1 + best[1] * step + 11}px`; d.style.top = `${1 + best[0] * step + 11}px`;
+    d.innerHTML = rt.key_terms.split(', ').slice(0, 2).join('<br>'); L.appendChild(d);
+  });
+}
+function tip(e, html) { const t = $('tip'); t.innerHTML = html; t.hidden = false; t.style.left = Math.min(e.clientX + 14, innerWidth - 270) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function paintSeg() {
+  const layer = $('slayer').value; let legend = '';
+  const R = S.regions, cells = [];
+  let get;
+  if (layer === 'umatrix') { const v = flat(S.umatrix), lo = Math.min(...v), hi = Math.max(...v); get = (r, c) => grey((S.umatrix[r][c] - lo) / (hi - lo || 1)); legend = rampLegend(grey, 'within a topic', 'border'); }
+  else if (layer === 'hits') { const hi = pct(flat(S.hits), 0.98); get = (r, c) => S.hits[r][c] ? seq(S.hits[r][c] / hi) : null; legend = rampLegend(seq, '1 segment', `${hi}+ segments`); }
+  else if (layer.startsWith('month:')) { const g = S.months[layer.slice(6)], lim = Math.max(0.5, pct(flat(g).filter(v => v > -90).map(Math.abs), 0.98)); get = (r, c) => g[r][c] < -90 ? null : div(g[r][c], lim); legend = divLegend(`less than usual (−${lim.toFixed(1)} log2)`, `more (+${lim.toFixed(1)} log2)`); }
+  else if (layer === 'format') {
+    const cats = PAL.cats.map(hex2rgb);
+    get = (r, c) => { const t = S.type_counts[r][c], n = t.reduce((a, b) => a + b, 0); if (!n) return null; const k = t.indexOf(Math.max(...t)); return mix(PAL.cell, cats[k], 0.25 + 0.75 * t[k] / n); };
+    legend = S.types.map((t, i) => `<span class="swatch"><i style="background:${PAL.cats[i]}"></i>${t}</span>`).join('') + '<span style="color:var(--muted)">paler = more mixed</span>';
+  }
+  else if (layer === 'punctuated') { get = (r, c) => S.punctuated[r][c] < -90 ? null : div(S.punctuated[r][c] - 0.53, 0.47); legend = divLegend('no punctuation', 'all punctuated'); }
+  else if (layer === 'concentration') { get = (r, c) => S.concentration[r][c] < -90 ? null : seq(S.concentration[r][c]); legend = rampLegend(seq, 'many videos', 'one video'); }
+  else if (layer === 'views') { const v = flat(S.views).filter(x => x > -90), lo = pct(v, 0.02), hi = pct(v, 0.98); get = (r, c) => S.views[r][c] < -90 ? null : seq((S.views[r][c] - lo) / (hi - lo)); legend = rampLegend(seq, `10^${lo.toFixed(1)} views`, `10^${hi.toFixed(1)}`); }
+  else if (layer.startsWith('plane:')) { const g = S.planes[layer.slice(6)], hi = pct(flat(g), 0.995); get = (r, c) => seq(g[r][c] / hi); legend = rampLegend(seq, 'term absent', 'term dominant'); }
+  for (let r = 0; r < S.rows; r++) for (let c = 0; c < S.cols; c++) {
+    const el = scells[r * S.cols + c], col = get(r, c);
+    el.classList.toggle('na', col === null); el.style.backgroundColor = col ? rgb(col) : 'var(--cell)';
+    const b = 'var(--border)';
+    el.style.boxShadow = [r > 0 && R[r-1][c] !== R[r][c] ? `inset 0 1.5px 0 ${b}` : '', c > 0 && R[r][c-1] !== R[r][c] ? `inset 1.5px 0 0 ${b}` : ''].filter(Boolean).join(',');
+  }
+  $('slegend').innerHTML = legend;
+}
+function selectSeg(r, c) {
+  scells.forEach(e => e.classList.remove('sel')); scells[r * S.cols + c].classList.add('sel');
+  const ex = S.examples[String(r * S.cols + c)] || [], reg = S.regions[r][c], rt = S.region_table.find(x => x.region === reg);
+  const t = S.type_counts[r][c];
+  $('spanel').innerHTML = `<h3>Square ${r * S.cols + c + 1} · ${S.hits[r][c]} segments</h3>
+    <h2>${S.top_terms[r][c].slice(0, 3).join(', ')}</h2>
+    <div><h3>Prototype's strongest terms</h3><div class="chips">${S.top_terms[r][c].map(w => `<span class="chip">${w}</span>`).join('')}</div></div>
+    <dl class="kv">${S.types.map((ty, i) => `<dt>${ty}</dt><dd>${t[i]}</dd>`).join('')}${S.punctuated[r][c] > -90 ? `<dt>punctuated</dt><dd>${Math.round(S.punctuated[r][c] * 100)}%</dd>` : ''}</dl>
+    ${rt ? `<div><h3>Region ${reg} · ${rt.segments} segments from ${rt.videos} videos</h3><p style="margin:0;color:var(--ink-2);font-size:12.5px">${rt.key_terms}</p></div>` : ''}
+    <div style="display:grid;gap:8px"><h3>Closest segments</h3>${ex.map(e => `<div class="ex"><a href="${e.url}" target="_blank" rel="noopener">${escapeHtml(e.title)}</a><span class="meta">${e.type} · ${e.month}</span><p>${escapeHtml(e.text)}…</p></div>`).join('') || '<span class="empty">No segment has this square as its best match.</span>'}</div>`;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+$('slayer').addEventListener('change', paintSeg);
+$('slabels').addEventListener('change', () => { $('rlabels').hidden = $('slabels').value === 'off'; });
+
+function rampLegend(fn, lo, hi) { const stops = [0, .25, .5, .75, 1].map(t => rgb(fn(t))).join(','); return `<span>${lo}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span>${hi}</span>`; }
+function divLegend(lo, hi) { const stops = [-1, -.5, 0, .5, 1].map(t => rgb(div(t, 1))).join(','); return `<span>${lo}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span>${hi}</span>`; }
+
+// ---------- boot ----------
+readPalette(); buildWord(); buildSeg();
+$('wlayer').value = 'regions'; $('slayer').value = 'umatrix';
+paintWord(); paintSeg();
+let wsel = [W.regions.length - 1, 0];
+try { const s = localStorage.getItem('som-wsel'); if (s) wsel = s.split(',').map(Number); } catch (e) {}
+// open on a topical square: the one holding "Migration" if present
+outer: for (let r = 0; r < W.rows; r++) for (let c = 0; c < W.cols; c++) if (W.cells[r][c].includes('Migration')) { wsel = [r, c]; break outer; }
+selectWord(wsel[0], wsel[1]);
+let best = 0, bestHits = -1; S.hits.forEach((row, r) => row.forEach((h, c) => { if (S.top_terms[r][c][0] === 'Migration' && h > bestHits) { best = r * S.cols + c; bestHits = h; } }));
+selectSeg(Math.floor(best / S.cols), best % S.cols);
+try { const t = localStorage.getItem('som-tab'); if (t) show(t); } catch (e) {}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readPalette(); paintWord(); paintSeg(); });
+new MutationObserver(() => { readPalette(); paintWord(); paintSeg(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>
